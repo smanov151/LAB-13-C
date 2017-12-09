@@ -19,10 +19,8 @@ namespace imageeditor
         public float lineWidth = 2F;
         public Color penColor = Color.DarkGreen;
         public Color solidBrushColor = Color.LightGreen;
-        public Font drawTextFont;
+        public Font drawTextFont = new Font(FontFamily.GenericSansSerif, 8F);
         Size pictureSize = new Size(800, 600);
-        BinaryFormatter formatter;
-        Stream stream;
         SaveFileDialog saveFileDialog;
         OpenFileDialog openFileDialog;
         public int selectedFigure = 0;
@@ -40,9 +38,6 @@ namespace imageeditor
             openFileDialog.InitialDirectory = System.Environment.CurrentDirectory;
             saveFileDialog.Filter = "bin files|*.bin|all files|*.*";
             openFileDialog.Filter = "bin files|*.bin|all files|*.*";
-            formatter = new BinaryFormatter();
-
-            drawTextFont = new Font(FontFamily.GenericSansSerif, 8F);
         }
 
         private void newToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -206,16 +201,18 @@ namespace imageeditor
 
         void saveToStream(Form2 f)
         {
-            stream = new FileStream(f.saveFileName, FileMode.Create, FileAccess.Write, FileShare.None);
-            formatter.Serialize(stream, f.listFigure);
-            stream.Close();
+            BinaryFormatter bf = new BinaryFormatter();
+            Stream fs = new FileStream(f.saveFileName, FileMode.Create, FileAccess.Write, FileShare.None);
+            bf.Serialize(fs, f.listFigure);
+            fs.Close();
         }
 
         void openFromStream(Form2 f)
         {
-            stream = new FileStream(f.saveFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            f.listFigure = (List<Figure>)formatter.Deserialize(stream);
-            stream.Close();
+            BinaryFormatter bf = new BinaryFormatter();
+            Stream fs = new FileStream(f.saveFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            f.listFigure = (List<Figure>)bf.Deserialize(fs);
+            fs.Close();
         }
 
         private void Form1_Load(object sender, EventArgs e)
