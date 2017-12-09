@@ -21,8 +21,6 @@ namespace imageeditor
         public Color solidBrushColor = Color.LightGreen;
         public Font drawTextFont = new Font(FontFamily.GenericSansSerif, 8F);
         Size pictureSize = new Size(800, 600);
-        SaveFileDialog saveFileDialog;
-        OpenFileDialog openFileDialog;
         public int selectedFigure = 0;
         public bool isFilled = true;
         public bool selectSwitch = false;
@@ -32,12 +30,6 @@ namespace imageeditor
         public Form1()
         {
             InitializeComponent();
-            saveFileDialog = new SaveFileDialog();
-            openFileDialog = new OpenFileDialog();
-            saveFileDialog.InitialDirectory = System.Environment.CurrentDirectory;
-            openFileDialog.InitialDirectory = System.Environment.CurrentDirectory;
-            saveFileDialog.Filter = "bin files|*.bin|all files|*.*";
-            openFileDialog.Filter = "bin files|*.bin|all files|*.*";
         }
 
         private void newToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -56,6 +48,8 @@ namespace imageeditor
                 if (MdiChildren.Length > 0)
                 {
                     f = (Form2)this.ActiveMdiChild;
+                    // Если есть дочерние окна то сначала проверяем
+                    // Если сохранена 
                     if (f.isModified)
                     {
                         if (MessageBox.Show("do you want to save changes?", "document has been modified", MessageBoxButtons.YesNo) == DialogResult.Yes)
@@ -63,27 +57,28 @@ namespace imageeditor
                             saveToFile(f);
                         }
                     }
-                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    OpenFileDialog ofd = new OpenFileDialog();
+                    if (ofd.ShowDialog() == DialogResult.OK)
                     {
-                        f.saveFileName = openFileDialog.FileName;
+                        f.saveFileName = ofd.FileName;
                         openFromStream(f);
                         f.pictureSize = f.listFigure[0].rectangle.Size;
                         f.Size = f.pictureSize;
                         f.AutoScrollMinSize = f.pictureSize;
                         f.Text = Path.GetFileName(f.saveFileName);
                         f.isSaved = true;
-
                         f.bufferedGraphics.Dispose();
                         f.bufferedGraphics = f.bufferedGraphicsContext.Allocate(f.CreateGraphics(), f.DisplayRectangle);
                     }
                 }
                 else
                 {
-                    if (openFileDialog.ShowDialog() == DialogResult.OK)
+                    OpenFileDialog ofd = new OpenFileDialog();
+                    if (ofd.ShowDialog() == DialogResult.OK)
                     {
                         f = new Form2(pictureSize);
                         f.MdiParent = this;
-                        f.saveFileName = openFileDialog.FileName;
+                        f.saveFileName = ofd.FileName;
                         openFromStream(f);
 
                         f.pictureSize = f.listFigure[0].rectangle.Size;
@@ -126,9 +121,10 @@ namespace imageeditor
             try
             {
                 Form2 f = (Form2)this.ActiveMdiChild;
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                SaveFileDialog sfd = new SaveFileDialog();
+                if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    f.saveFileName = saveFileDialog.FileName;
+                    f.saveFileName = sfd.FileName;
                     saveToStream(f);
                     f.Text = Path.GetFileName(f.saveFileName);
                     f.isSaved = true;
@@ -231,9 +227,10 @@ namespace imageeditor
             }
             else
             {
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                SaveFileDialog sfd = new SaveFileDialog();
+                if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    f.saveFileName = saveFileDialog.FileName;
+                    f.saveFileName = sfd.FileName;
                     saveToStream(f);
                     f.Text = Path.GetFileName(f.saveFileName);
                     f.isSaved = true;
