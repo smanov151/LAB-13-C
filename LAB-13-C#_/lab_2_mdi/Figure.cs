@@ -12,7 +12,9 @@ namespace imageeditor
     {
         // Флаг выделения
         [NonSerialized] public bool isSelected;
-		public bool WTF = false;
+		public bool WTF = false; // WTF is this variable for?
+        public bool FuckYou = false; // Fuck You !!
+        public string FuckOff = "Fuck Off";
         // Флаг модификации
         [NonSerialized] public bool isModifingSwitch = false;
 

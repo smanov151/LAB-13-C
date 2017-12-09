@@ -16,31 +16,24 @@ namespace imageeditor
 {
     public partial class Form1 : Form
     {
-        public float lineWidth;
-        public Color penColor;
-        public Color solidBrushColor;
+        public float lineWidth = 2F;
+        public Color penColor = Color.DarkGreen;
+        public Color solidBrushColor = Color.LightGreen;
         public Font drawTextFont;
-        Size pictureSize;
-
+        Size pictureSize = new Size(800, 600);
         BinaryFormatter formatter;
         Stream stream;
         SaveFileDialog saveFileDialog;
         OpenFileDialog openFileDialog;
-
-        public int selectedFigure;
-        public bool isFilled;
-
+        public int selectedFigure = 0;
+        public bool isFilled = true;
         public bool selectSwitch = false;
-
         public int MeshSize = 10;
         public bool MeshOn = false;
 
         public Form1()
         {
             InitializeComponent();
-            saveToolStripMenuItem.Enabled = false;
-            saveAsToolStripMenuItem.Enabled = false;
-
             saveFileDialog = new SaveFileDialog();
             openFileDialog = new OpenFileDialog();
             saveFileDialog.InitialDirectory = System.Environment.CurrentDirectory;
@@ -48,20 +41,6 @@ namespace imageeditor
             saveFileDialog.Filter = "bin files|*.bin|all files|*.*";
             openFileDialog.Filter = "bin files|*.bin|all files|*.*";
             formatter = new BinaryFormatter();
-
-            //pictureSize = new Size(800, 600);
-            //solidBrushColor = Color.White;
-            //penColor = Color.Black;
-            //lineWidth = 1F;
-            //isFilled = false;
-            //selectedFigure = 0; // rectangle
-
-            pictureSize = new Size(400, 300);
-            solidBrushColor = Color.LightGreen;
-            penColor = Color.DarkGreen;
-            lineWidth = 3F;
-            isFilled = true;
-            selectedFigure = 0;
 
             drawTextFont = new Font(FontFamily.GenericSansSerif, 8F);
         }
