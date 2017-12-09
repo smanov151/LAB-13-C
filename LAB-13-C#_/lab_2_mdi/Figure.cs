@@ -12,6 +12,7 @@ namespace imageeditor
     {
         // Флаг выделения
         [NonSerialized] public bool isSelected;
+		public bool WTF = false;
         // Флаг модификации
         [NonSerialized] public bool isModifingSwitch = false;
 
