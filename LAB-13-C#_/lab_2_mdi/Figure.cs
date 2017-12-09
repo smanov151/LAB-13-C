@@ -10,23 +10,14 @@ namespace imageeditor
     [Serializable()]
     public abstract class Figure
     {
-        // Флаг выделения
-        [NonSerialized] public bool isSelected;
-		public bool WTF = false; // WTF is this variable for?
-        public bool FuckYou = false; // Fuck You !!
-        public string FuckOff = "Fuck Off";
-        // Флаг модификации
+        [NonSerialized] public bool isSelected = false;
         [NonSerialized] public bool isModifingSwitch = false;
 
-        public Point p1;
-        public Point p2;
-        public Rectangle localRectangle;
-        public Point localP1, localP2;
+        public Point p1, p2, localP1, localP2;
+        public Rectangle rectangle, localRectangle;
 
-        protected Color penColor;
-        protected float penWidth;
-
-        public Rectangle rectangle;
+        public Color penColor;
+        public float penWidth;
         public bool isFilled;
 
         // Конструкторы
@@ -37,113 +28,73 @@ namespace imageeditor
             this.penColor = penColor;
             this.penWidth = penWidth;
             setRectangle();
-            isSelected = false;
         }
-        
         public Figure(Point p1, Point p2, Color penColor)
             : this(p1, p2, penColor, 1F) { }
-
         public Figure()
             : this(new Point(), new Point(), Color.Black) { }
 
         // Абстрактные методы
-
         public abstract void Draw(Graphics g, Size scrollPosition);
         public abstract void Draw(Graphics g, Color penColor, Size scrollPosition);
         public abstract void DrawSolid(Graphics g, Size scrollPosition);
         public abstract void DrawDash(Graphics g, Size scrollPosition);
         public abstract void Hide(Graphics g, Size scrollPosition);
 
-
         // Виртуальные методы
-
         public virtual object Clone()
         {
             return MemberwiseClone();
         }
-
         public virtual void setPoint1(Point p)
         {
             p1 = p;
             setRectangle();
         }
-
         public virtual void setPoint2(Point p)
         {
             p2 = p;
             setRectangle();
         }
-
         public virtual void MouseMove( Point offset )
         {
             rectangle.Location = Point.Add(rectangle.Location, (Size)offset);
         }
-
         public virtual void DrawWithMesh(Graphics g, Size scrollPosition, int meshSize) { }
 
-        // создать listSquresMod для квадратов модификации
-        public List<Figure> listSquaresMod = new List<Figure>();
+        public Rectangle[] rArray = new Rectangle[4];
         public virtual void DrawModify(Graphics g, Size scrollPosition)
         {
-
             localRectangle.Location = Point.Add(rectangle.Location, scrollPosition);
             localRectangle.Size = rectangle.Size;
 
-            Pen p = new Pen(Color.Red);
-            p.DashStyle = System.Drawing.Drawing2D.DashStyle.DashDotDot;
-            g.DrawRectangle(p, localRectangle);
+            rArray[0] = new Rectangle();
+            rArray[1] = new Rectangle();
 
-            // Вычисление позиции для квадратов
-            listSquaresMod.Clear();
-            Point p1mod_lt = new Point(rectangle.Location.X - 5,
-                rectangle.Location.Y - 5);
-            Point p1mod_br = new Point(rectangle.Location.X + 5,
-                rectangle.Location.Y + 5);
+            rArray[0].Location = new Point(localRectangle.Location.X - 5, localRectangle.Location.Y - 5);
+            rArray[0].Size = new Size(10, 10);
+            rArray[1].Location = new Point(localRectangle.Location.X - 5, localRectangle.Location.Y + rectangle.Height - 5);
+            rArray[1].Size = new Size(10, 10);
 
-            Point p2mod_lt = new Point(rectangle.Location.X + rectangle.Width - 5,
-                rectangle.Location.Y - 5);
-            Point p2mod_br = new Point(rectangle.Location.X + rectangle.Width + 5,
-                rectangle.Location.Y + 5);
-
-            Point p3mod_lt = new Point(rectangle.Location.X - 5,
-                 rectangle.Location.Y + rectangle.Height - 5);
-            Point p3mod_br = new Point(rectangle.Location.X + 5,
-                rectangle.Location.Y + rectangle.Height + 5);
-
-            Point p4mod_lt = new Point(rectangle.Location.X + rectangle.Width - 5,
-                rectangle.Location.Y + rectangle.Height - 5);
-            Point p4mod_br = new Point(rectangle.Location.X + rectangle.Width + 5,
-                rectangle.Location.Y + rectangle.Height + 5);
-
-            listSquaresMod.Add(new Rect(p1mod_lt, p1mod_br, Color.Black, 1F, Color.Green, true));
-            listSquaresMod.Add(new Rect(p2mod_lt, p2mod_br, Color.Black, 1F, Color.YellowGreen, true));
-            listSquaresMod.Add(new Rect(p3mod_lt, p3mod_br, Color.Black, 1F, Color.DarkOliveGreen, true));
-            listSquaresMod.Add(new Rect(p4mod_lt, p4mod_br, Color.Black, 1F, Color.ForestGreen, true));
-
-            foreach (var item in listSquaresMod)
-            {
-                item.DrawSolid(g, scrollPosition);
-            }
+            g.FillRectangle(Brushes.Red, rArray[0]);
+            g.FillRectangle(Brushes.Red, rArray[1]);
         }
 
 
         // Методы абстрактного класса
 
         // Создает Rectangle из 2х точек p1 и p2
-        // Хранящие глобальные координаты
-        Point loc = new Point();
-        Size size = new Size();
         public void setRectangle()
         {
-            loc.X = Math.Min(p1.X, p2.X);
-            loc.Y = Math.Min(p1.Y, p2.Y);
-            size.Width = Math.Abs(p1.X - p2.X);
-            size.Height = Math.Abs(p1.Y - p2.Y);
-            rectangle.Location = loc;
-            rectangle.Size = size;
+            Point l = new Point();
+            Size s = new Size();
+            l.X = Math.Min(p1.X, p2.X);
+            l.Y = Math.Min(p1.Y, p2.Y);
+            s.Width = Math.Abs(p1.X - p2.X);
+            s.Height = Math.Abs(p1.Y - p2.Y);
+            rectangle.Location = l;
+            rectangle.Size = s;
         }
-
-
     }
 
     [Serializable()]

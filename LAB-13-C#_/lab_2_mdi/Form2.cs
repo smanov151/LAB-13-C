@@ -26,7 +26,6 @@ namespace imageeditor
 
         // Switches -------------------
 
-
         public List<Figure> listFigure;
         public List<Figure> listFigureCopy; // Copy
         Figure myFigure;
@@ -182,11 +181,11 @@ namespace imageeditor
         }
 
         Point truePosition;
+        Figure curFig;
         private void Form2_MouseMove(object sender, MouseEventArgs e)
         {
             // истиная позиция обновляется всегда
             truePosition = Point.Subtract(e.Location, (Size)AutoScrollPosition);
-
             if (isClicked)
             { 
                 if (((Form1)MdiParent).selectSwitch)
@@ -234,44 +233,22 @@ namespace imageeditor
                     myFigure.DrawDash(g, (Size)AutoScrollPosition);
                 }
             }
-
             // Если установлен флаг модификации для всего класса, то 
             if (figModification)
             {
-
-                // Выбираем фигуру, которая модифицируется
-                Figure modFigure = null;
-                for (int i = 1; i < listFigure.Count; i++)
+                Console.WriteLine("mouse move mod");
+                Rectangle zeroRect = new Rectangle(e.Location, new Size(0, 0));
+                
+                for (int i = 0; i < 4; i++)
                 {
-                    if (listFigure[i].isModifingSwitch)
+                    if (curFig.rArray[i].IntersectsWith(zeroRect))
                     {
-                        modFigure = listFigure[i];
-                        break;
+                        Console.WriteLine("Cursor Hand");
+                        Cursor.Current = Cursors.Hand;
+                        return;
                     }
                 }
-
-                // Если такая фигура найдена, то
-                if (modFigure != null)
-                {
-                    Rectangle r = new Rectangle(truePosition, new Size(0, 0));
-                    // Перебираем все точки по краям
-                    // Debug
-                    List<Figure> testList = modFigure.listSquaresMod;
-
-                    // Debug
-                    foreach (var item in modFigure.listSquaresMod)
-                    {
-                        if (r.IntersectsWith(item.rectangle))
-                        {
-                            Cursor.Current = Cursors.Hand;
-                        }
-                        else
-                        {
-                            Cursor.Current = Cursors.Arrow;
-                        }
-                    }
-                }
-
+                Cursor.Current = Cursors.Default;
             }
 
             ((Form1)this.MdiParent).sb_coordinates.Text = truePosition.ToString();
@@ -354,13 +331,6 @@ namespace imageeditor
 
         private void Form2_Paint(object sender, PaintEventArgs e)
         {
-            // test //
-
-            ((Form1)MdiParent).label1.Text = listFigure.Last<Figure>().rectangle.ToString();
-            ((Form1)MdiParent).label2.Text = listFigure.Last<Figure>().localRectangle.ToString();
-
-            // test //
-
             if (isModified)
             {
                 ((Form1)MdiParent).statusBarPanel1_isModified.Text = "*";
@@ -396,7 +366,6 @@ namespace imageeditor
                 {
                     item.DrawDash(bufferedGraphics.Graphics, (Size)AutoScrollPosition);
                 }
-
                 if (!item.isSelected)
                 {
                     item.Draw(bufferedGraphics.Graphics, (Size)AutoScrollPosition);
@@ -467,9 +436,6 @@ namespace imageeditor
         {
             if (((Form1)MdiParent).selectSwitch == true)
             {
-                // Рисовать 8 точек по краям фигуры
-                
-
                 Point truePosition = Point.Subtract(e.Location, (Size)AutoScrollPosition);
                 Rectangle r = new Rectangle(truePosition, new Size(0, 0));
 
@@ -481,9 +447,8 @@ namespace imageeditor
                 }
                 // 
                 figModification = false;
-
-                // ???
                 isMoving = false;
+                curFig = null;
 
                 // Поиск фигуры над которой был двойной щелчок
                 bool test = false;
@@ -494,6 +459,8 @@ namespace imageeditor
                     {
                         // Устанавливаем флаг модификации фигуры
                         listFigure[i].isModifingSwitch = true;
+                        // curFig текущая фигура для модификации
+                        curFig = listFigure[i];
                         // Общий флаг модификации для класса
                         figModification = true;
                         break;
