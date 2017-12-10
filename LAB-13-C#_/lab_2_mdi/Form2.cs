@@ -24,11 +24,15 @@ namespace imageeditor
         public bool addSelection = false;
         public bool figModification = false; // Фигура модифицируется
 
+        bool mouseOnModRect = false;
+        bool mouseOnModRectClick = false;
+
         // Switches -------------------
 
         public List<Figure> listFigure;
         public List<Figure> listFigureCopy; // Copy
         Figure myFigure;
+        Figure curFig; // При выборе фигуры для модификации хранит эту фигуру
 
         public string saveFileName;
         public Size pictureSize;
@@ -36,11 +40,11 @@ namespace imageeditor
         public BufferedGraphics bufferedGraphics;
         public BufferedGraphicsContext bufferedGraphicsContext;
 
-        
         public Point mouseDownPoint = new Point();
+        Point truePosition; //
 
+        int modRectNum = 0; // Номер модифицируемого квадрата модификации
         
-
         public Form2(Size pictureSize)
         {
             InitializeComponent();
@@ -48,7 +52,7 @@ namespace imageeditor
             listFigureCopy = new List<Figure>(); // Copy
 
             this.pictureSize = pictureSize;
-            this.Size = pictureSize;
+            Size = pictureSize;
 
             // Создается первый Rectangle для белого фона и сетки
             myFigure = new Rect(new Point(0, 0), (Point)pictureSize, Color.White, 1F, Color.White, true);
@@ -64,7 +68,7 @@ namespace imageeditor
 
         private void Form2_Load(object sender, EventArgs e)
         {
-            bufferedGraphicsContext = BufferedGraphicsManager.Current;
+            BufferedGraphicsContext bufferedGraphicsContext = BufferedGraphicsManager.Current;
             bufferedGraphicsContext.MaximumBuffer = SystemInformation.PrimaryMonitorMaximizedWindowSize;
             bufferedGraphics = bufferedGraphicsContext.Allocate(this.CreateGraphics(), this.DisplayRectangle);
         }
@@ -75,6 +79,15 @@ namespace imageeditor
             isClicked = true;
 
             mouseDownPoint = e.Location;
+
+            // Обработка события когда мышь находится над квадратом модификации
+            mouseOnModRectClick = false;
+            if (mouseOnModRect)
+            {
+                mouseOnModRectClick = true;
+                Console.WriteLine("Mouse on mod rect on");
+                return;
+            }
 
             if ( ((Form1)MdiParent).selectSwitch )
             {
@@ -180,12 +193,27 @@ namespace imageeditor
             }
         }
 
-        Point truePosition;
-        Figure curFig;
+
         private void Form2_MouseMove(object sender, MouseEventArgs e)
         {
             // истиная позиция обновляется всегда
             truePosition = Point.Subtract(e.Location, (Size)AutoScrollPosition);
+            if (mouseOnModRectClick)
+            {
+                Point offset = Point.Subtract(e.Location, (Size)mouseDownPoint);
+                // Изменение координат точки
+                if (modRectNum == 0)
+                {
+                    curFig.rectangle.Location = truePosition;
+                    curFig.rectangle.Width = curFig.rectangle.Width - offset.X;
+                    curFig.rectangle.Height = curFig.rectangle.Height - offset.Y;
+                }
+                mouseDownPoint = e.Location;
+                Invalidate();
+                return;
+            }
+            
+            mouseOnModRect = false;
             if (isClicked)
             { 
                 if (((Form1)MdiParent).selectSwitch)
@@ -236,15 +264,17 @@ namespace imageeditor
             // Если установлен флаг модификации для всего класса, то 
             if (figModification)
             {
-                Console.WriteLine("mouse move mod");
+                // e.Location а не truePosition потому, что
+                // в методе drawModify координаты для квадратов
+                // передаюся как локальные
                 Rectangle zeroRect = new Rectangle(e.Location, new Size(0, 0));
-                
                 for (int i = 0; i < 4; i++)
                 {
                     if (curFig.rArray[i].IntersectsWith(zeroRect))
                     {
-                        Console.WriteLine("Cursor Hand");
                         Cursor.Current = Cursors.Hand;
+                        mouseOnModRect = true;
+                        modRectNum = i;
                         return;
                     }
                 }
@@ -254,9 +284,15 @@ namespace imageeditor
             ((Form1)this.MdiParent).sb_coordinates.Text = truePosition.ToString();
         }
 
-
         private void Form2_MouseUp(object sender, MouseEventArgs e)
         {
+            if (mouseOnModRectClick)
+            {
+                mouseOnModRectClick = false;
+                isClicked = false;
+                return;
+            }
+
             if (((Form1)MdiParent).selectSwitch)
             {
                 if (isMoving)

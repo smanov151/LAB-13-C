@@ -68,9 +68,6 @@ namespace imageeditor
             localRectangle.Location = Point.Add(rectangle.Location, scrollPosition);
             localRectangle.Size = rectangle.Size;
 
-            rArray[0] = new Rectangle();
-            rArray[1] = new Rectangle();
-
             rArray[0].Location = new Point(localRectangle.Location.X - 5, localRectangle.Location.Y - 5);
             rArray[0].Size = new Size(10, 10);
             rArray[1].Location = new Point(localRectangle.Location.X - 5, localRectangle.Location.Y + rectangle.Height - 5);
